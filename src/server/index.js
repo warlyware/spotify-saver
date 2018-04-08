@@ -12,8 +12,12 @@ const MONGO_URI = `mongodb://${creds.username}:${creds.password}@ds237989.mlab.c
 mongoose.Promise = global.Promise;
 mongoose.connect(MONGO_URI);
 mongoose.connection
-    .once('open', () => console.log('Connected to MongoLab instance.'))
-    .on('error', error => console.log('Error connecting to MongoLab:', error));
+  .once('open', () => console.log('Connected to MongoLab instance.'))
+  .on('error', error => console.log('Error connecting to MongoLab:', error));
+
+app.post('/api', function (req, res) {
+  console.log('heard post', req);
+})
 
 app.listen(4000, () => {
   console.log('Server up');
