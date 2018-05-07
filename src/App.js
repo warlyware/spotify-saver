@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
+import axios from 'axios';
+
 import logo from './logo.svg';
 import './App.css';
 
-import axios from 'axios';
+const API_URL = 'https://server-jhdilfwxaj.now.sh';
 
 class App extends Component {
   state = {
-    albumId: ''
+    albumId: '',
+    albums: []
+  }
+
+  componentWillMount = () => {
+    this.getAlbums();
   }
 
   displaySavedNotification = () => {
@@ -21,18 +28,26 @@ class App extends Component {
 
   saveAlbum = async () => {
     try {
-      const response = await axios.post('/api/saveAlbum', {
-        body: {
+      const response = await axios.post(`${API_URL}/api/saveAlbum`, {
           albumId: this.state.albumId
-        },
+        }, {
         headers: {
           'content-type': 'application/json'
         }
       });
       this.displaySavedNotification();
+      this.getAlbums();
     } catch (error) {
       console.error(`problem saving album: ${this.state.albumId}`)
     }
+  }
+
+  getAlbums = async () => {
+    const response = await axios.get(`${API_URL}/api/albums`);
+
+    this.setState({
+      albums: response.data
+    });
   }
 
   render() {
@@ -48,6 +63,19 @@ class App extends Component {
           onChange={this.handleInputChange} />
           <button onClick={this.saveAlbum}>Save</button>
         </p>
+        <ul>
+          {this.state.albums ?
+          this.state.albums.map((album) => {
+            console.log(album);
+            const albumUrl = `https://open.spotify.com/album/${album.albumId}`
+            return (
+              <li key={album._id}>
+                <a target="_blank" href={albumUrl}>{album.albumId}</a>
+              </li>
+            );
+          }):
+          null}
+        </ul>
       </div>
     );
   }
