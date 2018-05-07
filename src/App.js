@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Helmet } from 'react-helmet'
 
 import logo from './logo.svg';
 import './App.css';
@@ -12,7 +13,20 @@ class App extends Component {
     albums: []
   }
 
+  loadFirebase = () => {
+    const config = {
+      apiKey: "AIzaSyBK3nBOrN244-Vsc0Br3mcb9fM3NNGhY7o",
+      authDomain: "spotify-saver-270db.firebaseapp.com",
+      databaseURL: "https://spotify-saver-270db.firebaseio.com",
+      projectId: "spotify-saver-270db",
+      storageBucket: "",
+      messagingSenderId: "24735464294"
+    };
+    firebase.initializeApp(config);
+  }
+
   componentWillMount = () => {
+    this.loadFirebase();
     this.getAlbums();
   }
 
@@ -53,6 +67,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Helmet>
+          <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+        </Helmet>
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Save It!</h1>
