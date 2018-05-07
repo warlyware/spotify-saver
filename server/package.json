@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "start": "node ./index.js",
+    "deploy": "now -e DB_USERNAME=@username -e DB_PASS=@password --public"
+  },
+  "dependencies": {
+    "micro": "latest",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "mongoose": "^5.0.13"
+  }
+}
