@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Helmet } from 'react-helmet'
+import URL from 'url-parse';
 
 import logo from './logo.svg';
 import './App.css';
@@ -13,21 +14,24 @@ class App extends Component {
     albums: []
   }
 
-  loadFirebase = () => {
-    const config = {
-      apiKey: "AIzaSyBK3nBOrN244-Vsc0Br3mcb9fM3NNGhY7o",
-      authDomain: "spotify-saver-270db.firebaseapp.com",
-      databaseURL: "https://spotify-saver-270db.firebaseio.com",
-      projectId: "spotify-saver-270db",
-      storageBucket: "",
-      messagingSenderId: "24735464294"
-    };
-    firebase.initializeApp(config);
-  }
+  // loadFirebase = () => {
+  //   const config = {
+  //     apiKey: "AIzaSyBK3nBOrN244-Vsc0Br3mcb9fM3NNGhY7o",
+  //     authDomain: "spotify-saver-270db.firebaseapp.com",
+  //     databaseURL: "https://spotify-saver-270db.firebaseio.com",
+  //     projectId: "spotify-saver-270db",
+  //     storageBucket: "",
+  //     messagingSenderId: "24735464294"
+  //   };
+  //   firebase.initializeApp(config);
+  // }
 
   componentWillMount = () => {
-    this.loadFirebase();
     this.getAlbums();
+  }
+
+  componentDidMount = () => {
+    // this.loadFirebase();
   }
 
   displaySavedNotification = () => {
@@ -40,10 +44,17 @@ class App extends Component {
     });
   }
 
+  scrubAlbumId = () => {
+    const { pathname } = new URL(this.state.albumId);
+    return pathname ? pathname.replace('/album/', '') : this.state.albumId;
+  }
+
   saveAlbum = async () => {
+    const scrubbedAlbumId = this.scrubAlbumId();
+    console.log(scrubbedAlbumId);
     try {
       const response = await axios.post(`${API_URL}/api/saveAlbum`, {
-          albumId: this.state.albumId
+          albumId: scrubbedAlbumId
         }, {
         headers: {
           'content-type': 'application/json'
