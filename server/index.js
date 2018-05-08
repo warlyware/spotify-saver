@@ -1,11 +1,18 @@
+const Spotify = require('spotify-web-api-node');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const redirect_uri = 'http://localhost:4000';
-// const redirect_uri = 'https://server-jhdilfwxaj.now.sh';
 
+const REDIRECT_URI = 'http://localhost:4000/callback';
+// const REDIRECT_URI = 'https://server-jhdilfwxaj.now.sh/callback';
+
+const spotifyApi = new Spotify({
+  clientId: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  redirectUri: REDIRECT_URI
+});
 const MONGO_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASS}@ds237989.mlab.com:37989/spotify-saver`;
 
 mongoose.Promise = global.Promise;
@@ -35,12 +42,31 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  var scopes = 'user-read-private user-read-email';
-  res.redirect('https://accounts.spotify.com/authorize' +
-  '?response_type=code' +
-  '&client_id=' + my_client_id +
-  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-  '&redirect_uri=' + encodeURIComponent(redirect_uri));
+  request.post(authOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+
+      // use the access token to access the Spotify Web API
+      var token = body.access_token;
+      var options = {
+        url: 'https://api.spotify.com/v1/users/jmperezperez',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        json: true
+      };
+      request.get(options, function(error, response, body) {
+        console.log(body);
+        res.send(`huzzah`, token, body);
+      });
+    }
+    res.send(`fail`);
+  });
+});
+
+app.get('/callback', (req, res) => {
+  const { code } = req.query;
+  console.log(code);
+  res.send(code);
 });
 
 app.get('/api/albums', (req, res) => {
@@ -62,6 +88,7 @@ app.post('/api/saveAlbum', (req, res) => {
   });
   res.send(`Saved ${JSON.stringify(req.body)}`);
 });
+
 
 app.listen(4000, () => {
   console.log('Server up');

@@ -1,37 +1,72 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Helmet } from 'react-helmet'
 import URL from 'url-parse';
 
+import SpotifyService from './services/Spotify';
 import logo from './logo.svg';
 import './App.css';
 
-const API_URL = 'https://server-jhdilfwxaj.now.sh';
+const CLIENT_ID = 'e57d1e4978b04512b596bdca2157263f';
+const REDIRECT_URI = 'http://localhost:3000/';
+const API_URL = 'http://localhost:4000';
+// const API_URL = 'https://server-jhdilfwxaj.now.sh';
+
+function getUrlParams(search) {
+  let hashes = search.slice(search.indexOf('?') + 1).split('&')
+  let params = {}
+  hashes.map(hash => {
+      let [key, val] = hash.split('=')
+      params[key] = decodeURIComponent(val)
+  })
+
+  return params
+}
 
 class App extends Component {
   state = {
     albumId: '',
-    albums: []
+    albums: [],
+    accessToken: null,
+    userInfo: null
   }
 
-  // loadFirebase = () => {
-  //   const config = {
-  //     apiKey: "AIzaSyBK3nBOrN244-Vsc0Br3mcb9fM3NNGhY7o",
-  //     authDomain: "spotify-saver-270db.firebaseapp.com",
-  //     databaseURL: "https://spotify-saver-270db.firebaseio.com",
-  //     projectId: "spotify-saver-270db",
-  //     storageBucket: "",
-  //     messagingSenderId: "24735464294"
-  //   };
-  //   firebase.initializeApp(config);
-  // }
+  openSpotifyLoginWindow() {
+    const scopes = [
+      'user-read-email',
+    ];
+
+    const LOGIN_URL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+      `&scope=${encodeURIComponent(scopes.join(' '))}&response_type=token`;
+    window.location.assign(LOGIN_URL);
+  }
+
+  componentDidMount = () => {
+    let urlString = window.location.href.replace('#', '?');
+    const params = getUrlParams(urlString);
+    console.log(params.access_token);
+    if (params.access_token) {
+      this.setState({
+        accessToken: params.access_token
+      });
+    }
+    this.getUserInfo(params.access_token);
+    console.log(this.state.accessToken);
+  }
 
   componentWillMount = () => {
     this.getAlbums();
   }
 
-  componentDidMount = () => {
-    // this.loadFirebase();
+  getUserInfo = async (accessToken) => {
+    const userInfo = await axios.get(`https://api.spotify.com/v1/me`, {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`
+      }
+    });
+    this.setState({
+      userInfo
+    });
   }
 
   displaySavedNotification = () => {
@@ -78,19 +113,18 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Helmet>
-          <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
-        </Helmet>
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Save It!</h1>
+          <button onClick={this.openSpotifyLoginWindow}>Login</button>
         </header>
-        <p className="App-intro">
+        <div className="App-intro">
+          <p>{JSON.stringify(this.state.userInfo)}</p>
           <input type="text"
           value={this.state.albumId}
           onChange={this.handleInputChange} />
           <button onClick={this.saveAlbum}>Save</button>
-        </p>
+        </div>
         <ul>
           {this.state.albums ?
           this.state.albums.map((album) => {
