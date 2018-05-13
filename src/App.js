@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import URL from 'url-parse';
+import { Route, Link } from "react-router-dom";
 
 import logo from './logo.svg';
 import Loader from './components/Loader';
 import AlbumSaveForm from './components/AlbumSaveForm';
 import AlbumList from './components/AlbumList';
+import Home from './components/Home';
+import User from './components/User';
 import { getUrlParams } from './utils';
 import './App.css';
 
@@ -132,19 +135,20 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Save It!</h1>
           {this.state.accessToken ?
             null :
             <button onClick={this.openSpotifyLoginWindow}>Login</button>
           }
+          <AlbumSaveForm
+            albumId={this.state.albumId}
+            saveAlbum={this.saveAlbum}
+            handleInputChange={this.handleInputChange}
+          />
         </header>
+
+        {/* <Route exact path="/" component={Home} /> */}
+        {/* <Route path="/user/:accessToken/:refreshToken" component={User} /> */}
         <Loader isLoading={this.state.isLoading} />
-        <AlbumSaveForm
-          albumId={this.state.albumId}
-          saveAlbum={this.saveAlbum}
-          handleInputChange={this.handleInputChange}
-        />
-        <AlbumList />
       </div>
     );
   }
