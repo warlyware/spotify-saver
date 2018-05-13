@@ -2,25 +2,14 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import URL from 'url-parse';
 
-import SpotifyService from './services/Spotify';
 import logo from './logo.svg';
 import loader from './three-dots.svg';
+import { getUrlParams } from './utils';
 import './App.css';
 
 const CLIENT_ID = 'e57d1e4978b04512b596bdca2157263f';
 const REDIRECT_URI = 'https://spotify-saver-270db.firebaseapp.com';
 const API_URL = 'https://server-mkzeovfyzt.now.sh';
-
-function getUrlParams(search) {
-  let hashes = search.slice(search.indexOf('?') + 1).split('&');
-  let params = {};
-  hashes.map(hash => {
-      let [key, val] = hash.split('=')
-      params[key] = decodeURIComponent(val)
-  });
-
-  return params;
-}
 
 class App extends Component {
   state = {

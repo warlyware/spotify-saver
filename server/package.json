@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "node ./index.js",
-    "deploy": "now -e CLIENT_SECRET=client-secret -e DB_USERNAME=@username -e DB_PASS=@password --public"
+    "start": "NODE_ENV=dev node ./index.js",
+    "deploy": "NODE_ENV=production now -e CLIENT_SECRET=client-secret -e DB_USERNAME=@username -e DB_PASS=@password --public"
   },
   "dependencies": {
     "body-parser": "^1.18.2",

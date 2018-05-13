@@ -1,11 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-// require('dotenv').config();
 
-
-// const REDIRECT_URI = 'http://localhost:4000/callback';
-const REDIRECT_URI = 'https://server-jhdilfwxaj.now.sh/callback';
+if (process.env.NODE_ENV==='production') {
+  const REDIRECT_URI = 'https://server-jhdilfwxaj.now.sh/callback';
+} else {
+  require('dotenv').config();
+  const REDIRECT_URI = 'http://localhost:4000/callback';
+}
 
 const MONGO_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASS}@ds237989.mlab.com:37989/spotify-saver`;
 
