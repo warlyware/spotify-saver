@@ -5,14 +5,14 @@
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   position: absolute;
-  left: 8px;
-  top: 8px;
+  left: 24px;
+  top: 24px;
   height: 80px;
 }
 
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: 120px;
   padding: 20px;
   color: white;
 }
@@ -47,7 +47,7 @@ button {
 
 .loader-wrapper {
   padding: 16px;
-  height: 50px;
+  height: 10px;
 }
 
 .input-wrapper {

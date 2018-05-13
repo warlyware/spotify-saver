@@ -136,19 +136,19 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           {this.state.accessToken ?
-            null :
+            <AlbumSaveForm
+              albumId={this.state.albumId}
+              saveAlbum={this.saveAlbum}
+              handleInputChange={this.handleInputChange}
+            /> :
             <button onClick={this.openSpotifyLoginWindow}>Login</button>
           }
-          <AlbumSaveForm
-            albumId={this.state.albumId}
-            saveAlbum={this.saveAlbum}
-            handleInputChange={this.handleInputChange}
-          />
+          <Loader isLoading={this.state.isLoading} />
         </header>
-
-        {/* <Route exact path="/" component={Home} /> */}
-        {/* <Route path="/user/:accessToken/:refreshToken" component={User} /> */}
-        <Loader isLoading={this.state.isLoading} />
+        <Route exact path="/"
+          render={ () => <AlbumList albums={this.state.albums} /> }
+        />
+        <Route path="/user/:accessToken/:refreshToken" component={User} />
       </div>
     );
   }
