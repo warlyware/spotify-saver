@@ -22,7 +22,13 @@ const albumSchmea = mongoose.Schema({
   albumInfo: Object
 });
 
+const userSchmea = mongoose.Schema({
+  userId: String,
+  albums: Array
+});
+
 const Album = mongoose.model('Album', albumSchmea);
+const User = mongoose.model('User', userSchmea);
 
 const app = express();
 
@@ -51,11 +57,6 @@ app.get('/api/albums', (req, res) => {
     // return albums;
     res.send(albums);
   });
-});
-
-app.get('/callback', (req, res) => {
-  console.log(req.params);
-  res.redirect(`http://localhost:3000/user/${req.params.accessToken}/${req.params.refreshToken}`);
 });
 
 app.post('/api/saveAlbum', (req, res) => {
