@@ -1,18 +1,12 @@
-const Spotify = require('spotify-web-api-node');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-require('dotenv').config();
+// require('dotenv').config();
 
 
-const REDIRECT_URI = 'http://localhost:4000/callback';
-// const REDIRECT_URI = 'https://server-jhdilfwxaj.now.sh/callback';
+// const REDIRECT_URI = 'http://localhost:4000/callback';
+const REDIRECT_URI = 'https://server-jhdilfwxaj.now.sh/callback';
 
-const spotifyApi = new Spotify({
-  clientId: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  redirectUri: REDIRECT_URI
-});
 const MONGO_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASS}@ds237989.mlab.com:37989/spotify-saver`;
 
 mongoose.Promise = global.Promise;
@@ -22,7 +16,8 @@ mongoose.connection
   .on('error', error => console.log('Error connecting to MongoLab:', error));
 
 const albumSchmea = mongoose.Schema({
-  albumId: String
+  albumId: String,
+  albumInfo: Object
 });
 
 const Album = mongoose.model('Album', albumSchmea);
@@ -39,28 +34,6 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('api online');
-});
-
-app.get('/login', (req, res) => {
-  request.post(authOptions, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-
-      // use the access token to access the Spotify Web API
-      var token = body.access_token;
-      var options = {
-        url: 'https://api.spotify.com/v1/users/jmperezperez',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        },
-        json: true
-      };
-      request.get(options, function(error, response, body) {
-        console.log(body);
-        res.send(`huzzah`, token, body);
-      });
-    }
-    res.send(`fail`);
-  });
 });
 
 app.get('/callback', (req, res) => {
@@ -81,7 +54,8 @@ app.get('/api/albums', (req, res) => {
 app.post('/api/saveAlbum', (req, res) => {
   console.log('heard post', req.body);
   const album = new Album({
-    albumId: req.body.albumId
+    albumId: req.body.albumId,
+    albumInfo: req.body.albumInfo
   });
   album.save().then((response) => {
     console.log(`Saved to database: ${response}`)

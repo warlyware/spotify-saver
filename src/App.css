@@ -22,6 +22,34 @@
   font-size: large;
 }
 
+input {
+  padding: 7px;
+  width: 50%;
+}
+
+input[type="text"] {
+  font-size: 18px;
+}
+
+ul {
+  padding-top: 24px;
+  list-style: none;
+}
+
+button {
+  font-size: 18px;
+  padding: 8px;
+}
+
+.loader-wrapper {
+  padding: 16px;
+  height: 50px;
+}
+
+.input-wrapper {
+  padding: 8px;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

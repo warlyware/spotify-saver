@@ -4,22 +4,22 @@ import URL from 'url-parse';
 
 import SpotifyService from './services/Spotify';
 import logo from './logo.svg';
+import loader from './three-dots.svg';
 import './App.css';
 
 const CLIENT_ID = 'e57d1e4978b04512b596bdca2157263f';
-const REDIRECT_URI = 'http://localhost:3000/';
-const API_URL = 'http://localhost:4000';
-// const API_URL = 'https://server-jhdilfwxaj.now.sh';
+const REDIRECT_URI = 'https://spotify-saver-270db.firebaseapp.com';
+const API_URL = 'https://server-mkzeovfyzt.now.sh';
 
 function getUrlParams(search) {
-  let hashes = search.slice(search.indexOf('?') + 1).split('&')
-  let params = {}
+  let hashes = search.slice(search.indexOf('?') + 1).split('&');
+  let params = {};
   hashes.map(hash => {
       let [key, val] = hash.split('=')
       params[key] = decodeURIComponent(val)
-  })
+  });
 
-  return params
+  return params;
 }
 
 class App extends Component {
@@ -27,7 +27,8 @@ class App extends Component {
     albumId: '',
     albums: [],
     accessToken: null,
-    userInfo: null
+    userInfo: null,
+    isLoading: false
   }
 
   openSpotifyLoginWindow() {
@@ -81,15 +82,18 @@ class App extends Component {
 
   scrubAlbumId = () => {
     const { pathname } = new URL(this.state.albumId);
-    return pathname ? pathname.replace('/album/', '') : this.state.albumId;
+    return pathname.indexOf('/album') > - 1 ? pathname.replace('/album/', '') : this.state.albumId;
   }
 
   saveAlbum = async () => {
+    this.setState({ isLoading: true });
     const scrubbedAlbumId = this.scrubAlbumId();
     console.log(scrubbedAlbumId);
+    const albumInfo = await this.getAlbumInfo(scrubbedAlbumId);
     try {
       const response = await axios.post(`${API_URL}/api/saveAlbum`, {
-          albumId: scrubbedAlbumId
+          albumId: scrubbedAlbumId,
+          albumInfo: albumInfo.data
         }, {
         headers: {
           'content-type': 'application/json'
@@ -100,14 +104,31 @@ class App extends Component {
     } catch (error) {
       console.error(`problem saving album: ${this.state.albumId}`)
     }
+    this.setState({
+      albumId: '',
+      isLoading: false
+    });
   }
 
   getAlbums = async () => {
+    this.setState({
+      isLoading: true
+    });
     const response = await axios.get(`${API_URL}/api/albums`);
 
     this.setState({
-      albums: response.data
+      albums: response.data,
+      isLoading: false
     });
+  }
+
+  getAlbumInfo = async (albumId) => {
+    const albumInfo = await axios.get(`https://api.spotify.com/v1/albums/${albumId}`, {
+      headers: {
+        "Authorization": `Bearer ${this.state.accessToken}`
+      }
+    });
+    return albumInfo;
   }
 
   render() {
@@ -116,10 +137,18 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Save It!</h1>
-          <button onClick={this.openSpotifyLoginWindow}>Login</button>
+          {this.state.accessToken ?
+            null :
+            <button onClick={this.openSpotifyLoginWindow}>Login</button>
+          }
         </header>
-        <div className="App-intro">
-          <p>{JSON.stringify(this.state.userInfo)}</p>
+        <div className="loader-wrapper">
+          {this.state.isLoading ?
+          <img className="loader" src={loader} alt="loader" />
+            : null
+          }
+        </div>
+        <div className="input-wrapper">
           <input type="text"
           value={this.state.albumId}
           onChange={this.handleInputChange} />
@@ -129,10 +158,12 @@ class App extends Component {
           {this.state.albums ?
           this.state.albums.map((album) => {
             console.log(album);
-            const albumUrl = `https://open.spotify.com/album/${album.albumId}`
+            const albumUrl = `https://open.spotify.com/album/${album.albumId}`;
+            const artist = album.albumInfo ? album.albumInfo.artists[0].name : null;
+            const name = album.albumInfo ? album.albumInfo.name : album.albumId;
             return (
               <li key={album._id}>
-                <a target="_blank" href={albumUrl}>{album.albumId}</a>
+                <a target="_blank" href={albumUrl}>{artist} - {name}</a>
               </li>
             );
           }):
