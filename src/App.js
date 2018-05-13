@@ -5,6 +5,7 @@ import URL from 'url-parse';
 import logo from './logo.svg';
 import Loader from './components/Loader';
 import AlbumSaveForm from './components/AlbumSaveForm';
+import AlbumList from './components/AlbumList';
 import { getUrlParams } from './utils';
 import './App.css';
 
@@ -143,20 +144,7 @@ class App extends Component {
           saveAlbum={this.saveAlbum}
           handleInputChange={this.handleInputChange}
         />
-        <ul>
-          {this.state.albums ?
-          this.state.albums.map((album) => {
-            const albumUrl = `https://open.spotify.com/album/${album.albumId}`;
-            const artist = album.albumInfo ? album.albumInfo.artists[0].name : null;
-            const name = album.albumInfo ? album.albumInfo.name : album.albumId;
-            return (
-              <li key={album._id}>
-                <a target="_blank" href={albumUrl}>{artist} - {name}</a>
-              </li>
-            );
-          }):
-          null}
-        </ul>
+        <AlbumList />
       </div>
     );
   }
