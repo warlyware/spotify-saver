@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import URL from 'url-parse';
-import { Route, Link } from "react-router-dom";
+import { Route, Link, Redirect } from "react-router-dom";
 
 import logo from './logo.svg';
 import Loader from './components/Loader';
 import AlbumSaveForm from './components/AlbumSaveForm';
 import AlbumList from './components/AlbumList';
 import Home from './components/Home';
-import User from './components/User';
 import { getUrlParams } from './utils';
 import './App.css';
 
@@ -17,7 +16,7 @@ let REDIRECT_URI;
 let API_URL;
 
 if (window.location.href.indexOf('localhost' > -1)) {
-  REDIRECT_URI = 'http://localhost:3000/';
+  REDIRECT_URI = 'http://localhost:3000/callback/';
   API_URL = 'http://localhost:4000';
 } else {
   REDIRECT_URI = 'https://spotify-saver-270db.firebaseapp.com/';
@@ -37,7 +36,6 @@ class App extends Component {
     const scopes = [
       'user-read-email',
     ];
-    debugger;
     const LOGIN_URL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&scope=${encodeURIComponent(scopes.join(' '))}&response_type=token`;
@@ -130,6 +128,17 @@ class App extends Component {
     return albumInfo;
   }
 
+  saveUserInfo = () => {
+    let urlString = window.location.href.replace('#', '?');
+    let params = getUrlParams(urlString);
+    if (params.access_token) {
+      this.setState({
+        accessToken: params.access_token,
+        refreshToken: params.refresh_token
+      });
+    }
+  }
+
   render() {
     return (
       <div className="App">
@@ -146,9 +155,14 @@ class App extends Component {
           <Loader isLoading={this.state.isLoading} />
         </header>
         <Route exact path="/"
-          render={ () => <AlbumList albums={this.state.albums} /> }
+          render={() => <AlbumList albums={this.state.albums} />}
         />
-        <Route path="/user/:accessToken/:refreshToken" component={User} />
+        <Route path="/callback"
+          render={() => {
+            this.saveUserInfo();
+            return <Redirect to='/' />}
+          }
+        />
       </div>
     );
   }

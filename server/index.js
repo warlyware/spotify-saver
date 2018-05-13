@@ -53,6 +53,11 @@ app.get('/api/albums', (req, res) => {
   });
 });
 
+app.get('/callback', (req, res) => {
+  console.log(req.params);
+  res.redirect(`http://localhost:3000/user/${req.params.accessToken}/${req.params.refreshToken}`);
+});
+
 app.post('/api/saveAlbum', (req, res) => {
   console.log('heard post', req.body);
   const album = new Album({
