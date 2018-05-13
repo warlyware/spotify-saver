@@ -3,13 +3,22 @@ import axios from 'axios';
 import URL from 'url-parse';
 
 import logo from './logo.svg';
-import loader from './three-dots.svg';
+import Loader from './components/Loader';
+import AlbumSaveForm from './components/AlbumSaveForm';
 import { getUrlParams } from './utils';
 import './App.css';
 
 const CLIENT_ID = 'e57d1e4978b04512b596bdca2157263f';
-const REDIRECT_URI = 'https://spotify-saver-270db.firebaseapp.com';
-const API_URL = 'https://server-mkzeovfyzt.now.sh';
+let REDIRECT_URI;
+let API_URL;
+
+if (window.location.href.indexOf('localhost' > -1)) {
+  REDIRECT_URI = 'http://localhost:3000/';
+  API_URL = 'http://localhost:4000';
+} else {
+  REDIRECT_URI = 'https://spotify-saver-270db.firebaseapp.com/';
+  API_URL = 'https://server-mkzeovfyzt.now.sh';
+}
 
 class App extends Component {
   state = {
@@ -24,7 +33,7 @@ class App extends Component {
     const scopes = [
       'user-read-email',
     ];
-
+    debugger;
     const LOGIN_URL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&scope=${encodeURIComponent(scopes.join(' '))}&response_type=token`;
@@ -34,14 +43,12 @@ class App extends Component {
   componentDidMount = () => {
     let urlString = window.location.href.replace('#', '?');
     const params = getUrlParams(urlString);
-    console.log(params.access_token);
     if (params.access_token) {
       this.setState({
         accessToken: params.access_token
       });
     }
     this.getUserInfo(params.access_token);
-    console.log(this.state.accessToken);
   }
 
   componentWillMount = () => {
@@ -77,7 +84,6 @@ class App extends Component {
   saveAlbum = async () => {
     this.setState({ isLoading: true });
     const scrubbedAlbumId = this.scrubAlbumId();
-    console.log(scrubbedAlbumId);
     const albumInfo = await this.getAlbumInfo(scrubbedAlbumId);
     try {
       const response = await axios.post(`${API_URL}/api/saveAlbum`, {
@@ -131,22 +137,15 @@ class App extends Component {
             <button onClick={this.openSpotifyLoginWindow}>Login</button>
           }
         </header>
-        <div className="loader-wrapper">
-          {this.state.isLoading ?
-          <img className="loader" src={loader} alt="loader" />
-            : null
-          }
-        </div>
-        <div className="input-wrapper">
-          <input type="text"
-          value={this.state.albumId}
-          onChange={this.handleInputChange} />
-          <button onClick={this.saveAlbum}>Save</button>
-        </div>
+        <Loader isLoading={this.state.isLoading} />
+        <AlbumSaveForm
+          albumId={this.state.albumId}
+          saveAlbum={this.saveAlbum}
+          handleInputChange={this.handleInputChange}
+        />
         <ul>
           {this.state.albums ?
           this.state.albums.map((album) => {
-            console.log(album);
             const albumUrl = `https://open.spotify.com/album/${album.albumId}`;
             const artist = album.albumInfo ? album.albumInfo.artists[0].name : null;
             const name = album.albumInfo ? album.albumInfo.name : album.albumId;
